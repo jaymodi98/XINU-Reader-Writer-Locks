@@ -7,6 +7,7 @@
 #include <bufpool.h>
 #include <proc.h>
 #include <sem.h>
+#include <lock.h>
 #include <sleep.h>
 #include <mem.h>
 #include <tty.h>
@@ -178,6 +179,8 @@ LOCAL int sysinit()
 	}
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
+	//Initialization of locks
+	linit();
 
 #ifdef	MEMMARK
 	_mkinit();			/* initialize memory marking */
