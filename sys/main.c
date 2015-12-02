@@ -175,6 +175,108 @@ void test4() {
 	kill(pid2);
 }
 
+/*-----------------------------------Test 5---------------------------*/
+void test5 ()
+{
+    int     lck[5];
+    int     index;
+    int ret;
+
+    kprintf("\nTest 5: release multiple locks simultaneously\n");
+
+    for (index = 0; index < 5; index++) {
+        lck[index] = lcreate ();
+        assert (lck[index] != SYSERR,"Test 5 FAILED\n");
+
+        ret = lock (lck[index], READ, DEFAULT_LOCK_PRIO);
+        assert (ret == OK,"Test 5 FAILED\n");
+    }
+
+    ret = releaseall (2, lck[4], lck[0]);
+    assert (ret == OK,"Test 5 FAILED\n");
+
+    ret = releaseall (3, lck[1], lck[3], lck[2]);
+    assert (ret == OK,"Test 5 FAILED\n");
+
+    for (index = 0; index < 5; index++) {
+        ldelete (lck[index]);
+    }
+
+    kprintf ("Test 5 PASSED!\n");
+}
+
+/*----------------------------------Test 6---------------------------*/
+char output7[10];
+int count7;
+void reader6 (char i, int lck, int lprio)
+{
+    int     ret;
+
+    //kprintf ("  %c: to acquire lock\n", i);
+    lock (lck, READ, lprio);
+    output7[count7++]=i;
+    //kprintf ("  %c: acquired lock, sleep 3s\n", i);
+    sleep (3);
+    //kprintf ("  %c: to release lock\n", i);
+    output7[count7++]=i;
+    releaseall (1, lck);
+
+}
+
+void writer6 (char i, int lck, int lprio)
+{
+    //kprintf ("  %c: to acquire lock\n", i);
+    lock (lck, WRITE, lprio);
+    output7[count7++]=i;
+    //kprintf ("  %c: acquired lock, sleep 3s\n", i);
+    sleep (3);
+    //kprintf ("  %c: to release lock\n", i);
+    output7[count7++]=i;
+    releaseall (1, lck);
+
+}
+
+void test6 ()
+{
+    int     lck;
+    int     rd1, rd2, rd3, rd4;
+    int     wr1;
+
+    count7 = 0;
+    kprintf("\nTest 6: wait on locks with priority. Expected order of "
+    "lock acquisition is: reader A, reader B, reader C, writer E, reader D\n");
+    lck  = lcreate ();
+    assert (lck != SYSERR,"Test 6 FAILED\n");
+
+    rd1 = create(reader6, 2000, 20, "reader6", 3, 'A', lck, 20);
+    rd2 = create(reader6, 2000, 20, "reader6", 3, 'B', lck, 30);
+    rd3 = create(reader6, 2000, 20, "reader6", 3, 'C', lck, 40);
+    rd4 = create(reader6, 2000, 20, "reader6", 3, 'D', lck, 20);
+    wr1 = create(writer6, 2000, 20, "writer6", 3, 'E', lck, 25);
+
+    //kprintf("-start reader A, then sleep 1s. lock granted to reader A\n");
+    resume(rd1);
+    sleep (1);
+
+    //kprintf("-start writer C, then sleep 1s. writer waits for the lock\n");
+    resume(wr1);
+    sleep (1);
+
+    //kprintf("-start reader B, D, E. reader B is granted lock.\n");
+    resume (rd2);
+    sleep10(1);
+    resume (rd3);
+    sleep10(1);
+    resume (rd4);
+
+
+    sleep (10);
+    ldelete (lck);
+    kill(rd1);kill(rd2);kill(rd3);kill(rd4);kill(wr1);
+    kprintf("Output is %s\n",output7);
+
+}
+
 /*------------------------------------------------------------------------
  *  main  --  user main program
  *------------------------------------------------------------------------
@@ -185,5 +287,8 @@ int main() {
 	test2();
 	test3();
 	test4();
+	test5();
+	test6();
+
 	return 0;
 }
