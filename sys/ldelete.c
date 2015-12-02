@@ -40,8 +40,8 @@ int ldelete(int ldesc) {
 	}
 
 	for (i = 0; i < NPROC; i++) {
-		locktab[i][lock].time = -1;
-		locktab[i][lock].type = NONE;
+		locktab[i][ldesc].time = -1;
+		locktab[i][ldesc].type = NONE;
 
 	}
 	restore(ps);

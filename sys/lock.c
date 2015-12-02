@@ -10,6 +10,7 @@
 #include <q.h>
 #include <lock.h>
 #include <stdio.h>
+#include <sleep.h>
 
 int lock(int ldesc, int type, int priority) {
 	STATWORD ps;
@@ -24,14 +25,19 @@ int lock(int ldesc, int type, int priority) {
 		return SYSERR;
 	}
 
+	if ((pptr = &proctab[currpid])->pwaitret == DELETED) {
+		pptr->pwaitret = OK;
+		restore(ps);
+		return SYSERR;
+	}
+
 	/* some process is holding the lock */
 	if (lptr->ltype != NONE) {
 		if (lptr->ltype == READ) { /* a reader is holding the lock */
 			if (type == READ) { /* the current process is a reader */
 				if (nonempty(lptr->lqhead)) {
-					int hpProc = q[lptr->lqtail].qprev;
-					int hp = lastkey(lptr->lqtail);
-					if (hpProc > priority) {
+					int hprio = lastkey(lptr->lqtail);
+					if (hprio > priority) {
 						shouldWait = 1;
 					}
 				}
