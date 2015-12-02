@@ -11,7 +11,7 @@
 #include <proc.h>
 
 struct lentry locks[NLOCK];
-int locktab[NPROC][NLOCK];
+struct lstat locktab[NPROC][NLOCK];
 int nextlock;
 
 void linit() {
@@ -23,12 +23,13 @@ void linit() {
 	for (i = 0; i < NLOCK; i++) { /* initialize semaphores */
 		(lptr = &locks[i])->lstate = LFREE;
 		lptr->lqtail = 1 + (lptr->lqhead = newqueue());
-		lptr->lholder = NONE;
+		lptr->ltype = NONE;
 	}
 
 	for (i = 0; i < NPROC; i++) {
 		for (j = 0; j < NLOCK; j++) {
-			locktab[i][j] = NONE;
+			locktab[i][j].time = -1;
+			locktab[i][j].type = NONE;
 		}
 	}
 }

@@ -26,13 +26,18 @@ struct lentry {
 	char lstate; /* the state SFREE or SUSED		*/
 	int lqhead; /* q index of head of list		*/
 	int lqtail; /* q index of tail of list		*/
-	int lholder; /* the process id that currently holds it */
+	int ltype; /* read lock or write lock */
 };
 
-extern	struct	lentry	locks[];
-extern  int locktab[][NLOCK];
+struct lstat {
+	int type;
+	long int time;
+};
 
-extern	int	nextlock;
+extern struct lentry locks[];
+extern struct lstat locktab[][NLOCK];
+
+extern int nextlock;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCK)
 

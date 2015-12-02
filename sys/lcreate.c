@@ -35,7 +35,7 @@ SYSCALL lcreate() {
  */
 LOCAL int newlock() {
 	int lock;
-	int i,j;
+	int i;
 
 	for (i = 0; i < NLOCK; i++) {
 		lock = nextlock--;
@@ -43,8 +43,6 @@ LOCAL int newlock() {
 			nextlock = NLOCK - 1;
 		if (locks[lock].lstate == LFREE) {
 			locks[lock].lstate = LUSED;
-			for(j = 0; j < NPROC; j++)
-				locktab[j][lock] = NOTUSING;
 			return (lock);
 		}
 	}

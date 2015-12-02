@@ -16,30 +16,33 @@
  *------------------------------------------------------------------------
  */
 
-int ldelete(int ldesc){
+int ldelete(int ldesc) {
 	STATWORD ps;
-	int pid,i;
+	int pid, i;
 	struct lentry *lptr;
 
 	disable(ps);
-	if(isbadlock(ldesc) || locks[ldesc].lstate == LFREE){
+	if (isbadlock(ldesc) || locks[ldesc].lstate == LFREE) {
 		restore(ps);
 		return SYSERR;
 	}
 
 	lptr = &locks[ldesc];
 	lptr->lstate = LFREE;
+	lptr->ltype = NONE;
 
-	if(nonempty(lptr->lqhead)){
-		while((pid=getfirst(lptr->lqhead)) != EMPTY){
+	if (nonempty(lptr->lqhead)) {
+		while ((pid = getfirst(lptr->lqhead)) != EMPTY) {
 			proctab[pid].pwaitret = DELETED;
-			ready(pid,RESCHNO);
+			ready(pid, RESCHNO);
 		}
 		resched();
 	}
 
-	for (i=0;i<NPROC; i++){
-		locktab[i][ldesc] = NOTUSING;
+	for (i = 0; i < NPROC; i++) {
+		locktab[i][lock].time = -1;
+		locktab[i][lock].type = NONE;
+
 	}
 	restore(ps);
 	return (OK);
