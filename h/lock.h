@@ -14,7 +14,8 @@
 
 /* lock types used in int lock (int ldes1, int type, int priority) */
 
-#define NOTUSING -1
+#define NONE -1
+
 #define READ 1
 #define WRITE 0
 
@@ -25,6 +26,7 @@ struct lentry {
 	char lstate; /* the state SFREE or SUSED		*/
 	int lqhead; /* q index of head of list		*/
 	int lqtail; /* q index of tail of list		*/
+	int lholder; /* the process id that currently holds it */
 };
 
 extern	struct	lentry	locks[];

@@ -23,11 +23,12 @@ void linit() {
 	for (i = 0; i < NLOCK; i++) { /* initialize semaphores */
 		(lptr = &locks[i])->lstate = LFREE;
 		lptr->lqtail = 1 + (lptr->lqhead = newqueue());
+		lptr->lholder = NONE;
 	}
 
 	for (i = 0; i < NPROC; i++) {
 		for (j = 0; j < NLOCK; j++) {
-			locktab[i][j] = NOTUSING;
+			locktab[i][j] = NONE;
 		}
 	}
 }

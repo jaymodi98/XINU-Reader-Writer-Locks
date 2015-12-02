@@ -18,7 +18,7 @@
 
 int ldelete(int ldesc){
 	STATWORD ps;
-	int pid;
+	int pid,i;
 	struct lentry *lptr;
 
 	disable(ps);
@@ -38,6 +38,9 @@ int ldelete(int ldesc){
 		resched();
 	}
 
+	for (i=0;i<NPROC; i++){
+		locktab[i][ldesc] = NOTUSING;
+	}
 	restore(ps);
 	return (OK);
 }
