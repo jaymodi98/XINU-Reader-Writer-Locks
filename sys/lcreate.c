@@ -37,10 +37,10 @@ LOCAL int newlock() {
 	int lock;
 	int i;
 
-	for (i = 0; i < NLOCK; i++) {
+	for (i = 0; i < NLOCKS; i++) {
 		lock = nextlock--;
 		if (nextlock < 0)
-			nextlock = NLOCK - 1;
+			nextlock = NLOCKS - 1;
 		if (locks[lock].lstate == LFREE) {
 			locks[lock].lstate = LUSED;
 			return (lock);

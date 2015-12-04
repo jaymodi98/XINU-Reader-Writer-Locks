@@ -8,8 +8,8 @@
 #ifndef _LOCK_H_
 #define _LOCK_H_
 
-#ifndef	NLOCK
-#define	NLOCK		50	/* number of locks, if not defined	*/
+#ifndef	NLOCKS
+#define	NLOCKS		50	/* number of locks, if not defined	*/
 #endif
 
 /* lock types used in int lock (int ldes1, int type, int priority) */
@@ -35,10 +35,10 @@ struct lstat {
 };
 
 extern struct lentry locks[];
-extern struct lstat locktab[][NLOCK];
+extern struct lstat locktab[][NLOCKS];
 
 extern int nextlock;
 
-#define	isbadlock(l)	(l<0 || l>=NLOCK)
+#define	isbadlock(l)	(l<0 || l>=NLOCKS)
 
 #endif

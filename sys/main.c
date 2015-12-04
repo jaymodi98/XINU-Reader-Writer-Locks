@@ -115,13 +115,13 @@ void test2() {
 
 /*-----------------------------------Test 3---------------------------*/
 void test3() {
-	int lck[NLOCK];
+	int lck[NLOCKS];
 	int last_lck;
 	int index;
 
 	kprintf("\nTest 3: return SYSERR if no lock is available\n");
 
-	for (index = 0; index < NLOCK; index++) {
+	for (index = 0; index < NLOCKS; index++) {
 		lck[index] = lcreate();
 		assert(lck[index] != SYSERR, "Test 3 FAILED\n");
 	}
@@ -129,7 +129,7 @@ void test3() {
 	last_lck = lcreate();
 	assert(last_lck == SYSERR, "Test 3 FAILED\n");
 
-	for (index = 0; index < NLOCK; index++) {
+	for (index = 0; index < NLOCKS; index++) {
 		ldelete(lck[index]);
 	}
 	kprintf("Test 3 PASSED!\n");
@@ -585,7 +585,7 @@ void test9() {
 	// Delete lock
 	ldelete(lastlck);
 
-	for (i = 1; i < NLOCK; i++) {
+	for (i = 1; i < NLOCKS; i++) {
 		lastlck = lcreate();
 		ldelete(lastlck);
 	}
