@@ -18,10 +18,23 @@
 
 int ldelete(int ldesc) {
 	STATWORD ps;
-	int pid, i;
+	int pid, i ,flag = 0;
 	struct lentry *lptr;
 
 	disable(ps);
+
+	for(i=0;i<NLOCKS;i++){
+		if(locks[i].lrefNum == ldesc){
+			ldesc = i;
+			flag = 1;
+			break;
+		}
+	}
+
+	if(flag == 0){
+		restore(ps);
+		return SYSERR;
+	}
 	if (isbadlock(ldesc) || locks[ldesc].lstate == LFREE) {
 		restore(ps);
 		return SYSERR;

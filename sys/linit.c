@@ -13,17 +13,20 @@
 struct lentry locks[NLOCKS];
 struct lstat locktab[NPROC][NLOCKS];
 int nextlock;
+int refNum;
 
 void linit() {
 
 	struct lentry * lptr;
 	int i, j;
 	nextlock = NLOCKS - 1;
+	refNum = -1;
 
 	for (i = 0; i < NLOCKS; i++) { /* initialize semaphores */
 		(lptr = &locks[i])->lstate = LFREE;
 		lptr->lqtail = 1 + (lptr->lqhead = newqueue());
 		lptr->ltype = NONE;
+		lptr->lrefNum = -1;
 	}
 
 	for (i = 0; i < NPROC; i++) {

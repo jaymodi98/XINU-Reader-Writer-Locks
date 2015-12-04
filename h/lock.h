@@ -27,6 +27,7 @@ struct lentry {
 	int lqhead; /* q index of head of list		*/
 	int lqtail; /* q index of tail of list		*/
 	int ltype; /* read lock or write lock */
+	int lrefNum; /* current reference of this lock */
 };
 
 struct lstat {
@@ -38,6 +39,7 @@ extern struct lentry locks[];
 extern struct lstat locktab[][NLOCKS];
 
 extern int nextlock;
+extern int refNum;
 
 #define	isbadlock(l)	(l<0 || l>=NLOCKS)
 

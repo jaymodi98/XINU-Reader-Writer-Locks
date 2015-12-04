@@ -42,8 +42,10 @@ LOCAL int newlock() {
 		if (nextlock < 0)
 			nextlock = NLOCKS - 1;
 		if (locks[lock].lstate == LFREE) {
+			++refNum;
 			locks[lock].lstate = LUSED;
-			return (lock);
+			locks[lock].lrefNum = refNum;
+			return (refNum);
 		}
 	}
 	return (SYSERR);
