@@ -13,11 +13,14 @@
 
 #define INT_MIN     (-2147483647 - 1)
 
+int isLockHeld(int ldesc);
+
 int releaseall(int numlocks, int ldes1, ...) {
 	int ldesc, flag = 0;
 	unsigned long *a = (unsigned long *) (&ldes1);
 	while (numlocks-- && flag == 0) {
 		ldesc = *a++;
+		//kprintf("The lock to remove %d",ldesc);
 		if (release(ldesc) == SYSERR)
 			flag = 1;
 	}
@@ -27,7 +30,6 @@ int releaseall(int numlocks, int ldes1, ...) {
 	else
 		return (OK);
 }
-;
 
 int release(int ldesc) {
 //
@@ -50,13 +52,16 @@ int release(int ldesc) {
 	locktab[currpid][ldesc].time = -1;
 
 	if (nonempty(lptr->lqhead)) {
-
 		int hpPid = q[lptr->lqtail].qprev;
 		if (locktab[hpPid][ldesc].type == WRITE) { /* highest priority process is a writer */
-			lptr->ltype = WRITE;
-			locktab[hpPid][ldesc].type = WRITE;
-			locktab[hpPid][ldesc].time = -1;
-			ready(getfirst(lptr->lqhead), RESCHNO);
+
+			if (isLockHeld(ldesc) == 0) {
+				lptr->ltype = WRITE;
+				locktab[hpPid][ldesc].type = WRITE;
+				locktab[hpPid][ldesc].time = -1;
+				ready(getlast(lptr->lqtail), RESCHNO);
+			}
+			//kprintf("The first process %s", proctab[hpPid].pname);
 
 		} else { /* highest priority process is a reader */
 			int hprio = INT_MIN;
@@ -77,7 +82,7 @@ int release(int ldesc) {
 					lptr->ltype = READ;
 					locktab[hpPid][ldesc].type = READ;
 					locktab[hpPid][ldesc].time = -1;
-					ready(getfirst(lptr->lqhead), RESCHNO);
+					ready(getlast(lptr->lqtail), RESCHNO);
 				}
 			} else { /*There is a writer in the waiting queue */
 				i = q[lptr->lqtail].qprev;
@@ -87,14 +92,14 @@ int release(int ldesc) {
 					lptr->ltype = WRITE;
 					locktab[hpPid][ldesc].type = WRITE;
 					locktab[hpPid][ldesc].time = -1;
-					ready(getfirst(lptr->lqhead), RESCHNO);
+					ready(getlast(lptr->lqtail), RESCHNO);
 				} else {
 					while (q[lptr->lqtail].qprev != highPriorityWriter) {
 
 						lptr->ltype = READ;
 						locktab[hpPid][ldesc].type = READ;
 						locktab[hpPid][ldesc].time = -1;
-						ready(getfirst(lptr->lqhead), RESCHNO);
+						ready(getlast(lptr->lqtail), RESCHNO);
 					}
 				}
 			}
@@ -106,4 +111,14 @@ int release(int ldesc) {
 
 	restore(ps);
 	return OK;
+}
+
+int isLockHeld(int ldesc) {
+	int i;
+	for (i = 0; i < NPROC; i++) {
+		if (locktab[i][ldesc].time == -1 && locktab[i][ldesc].type != NONE) {
+			return 1;
+		}
+	}
+	return 0;
 }

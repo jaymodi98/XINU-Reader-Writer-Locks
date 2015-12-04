@@ -52,8 +52,10 @@ int lock(int ldesc, int type, int priority) {
 	}
 
 	if (shouldWait) {
+
+		//kprintf("%s is put in the queue",proctab[currpid].pname);
 		(pptr = &proctab[currpid])->pstate = PRWAIT;
-		enqueue(currpid, lptr->lqtail);
+		insert(currpid, lptr->lqhead,priority);
 		pptr->pwaitret = OK;
 		locktab[currpid][ldesc].type = type;
 		locktab[currpid][ldesc].time = clktime;
